@@ -27,7 +27,7 @@ TODO:
 import logging
 import random
 import time
-from typing import Dict, List, Optional, Any, Union
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import quote_plus
 
 import requests
@@ -180,8 +180,12 @@ class WebSearchTool:
                 if response.status_code == 200:
                     soup = BeautifulSoup(response.text, "html.parser")
                     for result in soup.select(".result"):
-                        title_elem: Optional[Tag] = result.select_one(".result__title a")
-                        snippet_elem: Optional[Tag] = result.select_one(".result__snippet")
+                        title_elem: Optional[Tag] = result.select_one(
+                            ".result__title a"
+                        )
+                        snippet_elem: Optional[Tag] = result.select_one(
+                            ".result__snippet"
+                        )
 
                         if title_elem:
                             result_dict = {

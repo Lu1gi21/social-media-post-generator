@@ -21,14 +21,15 @@ TODO:
 - Add support for research validation
 """
 
-from typing import Dict, List, Optional, Any, Union
+from typing import Any, Dict, List, Optional, Union
+
 from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain.agents.agent_types import AgentType
+from langchain.agents.base import BaseAgent
 from langchain.tools import Tool
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
-from langchain.agents.agent_types import AgentType
-from langchain.agents.base import BaseAgent
 
 from .research_cache import ResearchCache
 from .web_search import WebSearchTool

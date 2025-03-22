@@ -18,7 +18,8 @@ TODO:
 
 import os
 import re
-from typing import Dict, Any, List, TypedDict, Optional, Union
+from typing import Any, Dict, List, Optional, TypedDict, Union
+
 from dotenv import load_dotenv
 from langgraph.graph import Graph, StateGraph
 from langgraph.prebuilt import ToolExecutor
@@ -62,7 +63,7 @@ class SocialMediaAgent:
     generation. It supports multiple social media platforms with platform-specific
     optimizations and constraints.
     """
-    
+
     def __init__(self) -> None:
         """Initialize the social media agent.
 
@@ -118,9 +119,9 @@ class SocialMediaAgent:
                 },
             ],
         )
-        
+
         return response.choices[0].message.content or content
-        
+
     def _create_graph(self) -> Graph:
         """Create the LangGraph workflow for post generation.
 
@@ -212,7 +213,7 @@ Format the response in a clear, structured way that will help create engaging so
                 {"role": "user", "content": research_prompt},
             ],
         )
-        
+
         state["researched_content"] = response.choices[0].message.content or ""
         return state
 
@@ -262,17 +263,17 @@ Note: When using emojis:
                 },
             ],
         )
-        
+
         state["generated_content"] = response.choices[0].message.content or ""
         return state
 
     def _format_post(self, state: AgentState) -> AgentState:
         """Format the post according to platform-specific requirements.
-        
+
         This method applies platform-specific formatting rules to the generated content,
         including character limits, hashtag placement, and other platform-specific
         optimizations.
-        
+
         Args:
             state: Current state containing the generated content and platform info
 
@@ -281,73 +282,76 @@ Note: When using emojis:
         """
         platform = state["platform"]
         content = state["generated_content"]
-        
+
         # Apply platform-specific formatting
         formatted_content = content
-        
+
         # Add hashtags if supported by the platform
         if Config.get_platform_config(platform).hashtag_support:
             hashtags = self._generate_hashtags(content, limit=5)
             formatted_content += f"\n\n{' '.join(hashtags)}"
-        
+
         # Optimize emoji usage if supported
         if Config.get_platform_config(platform).emoji_support:
             formatted_content = self._optimize_emoji_usage(formatted_content, platform)
-        
+
         state["formatted_content"] = formatted_content
         return state
 
     def _validate_post(self, state: AgentState) -> AgentState:
         """Validate the post against platform-specific rules and requirements.
-        
+
         This method ensures the post meets all platform-specific requirements,
         including character limits, content guidelines, and formatting rules.
-        
+
         Args:
             state: Current state containing the formatted content
-            
+
         Returns:
             AgentState: Updated state containing the validated content
         """
         platform = state["platform"]
         content = state["formatted_content"]
-        
+
         # Get platform-specific requirements
         config = Config.get_platform_config(platform)
-        
+
         # Validate character count
         if len(content) > config.max_length:
-            content = content[:config.max_length - 3] + "..."
-        
+            content = content[: config.max_length - 3] + "..."
+
         # Validate against platform-specific rules
         response = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": f"""You are a social media content validator.
+                {
+                    "role": "system",
+                    "content": f"""You are a social media content validator.
                 Validate the following content against {platform}'s rules and requirements:
-                {config.validation_rules}"""},
-                {"role": "user", "content": content}
-            ]
+                {config.validation_rules}""",
+                },
+                {"role": "user", "content": content},
+            ],
         )
-        
+
         state["final_content"] = response.choices[0].message.content or content
         return state
 
     def _split_into_thread(self, content: str) -> List[str]:
         """Split content into a thread of posts if it exceeds platform limits.
-        
+
         Args:
             content: The content to split into a thread
-            
+
         Returns:
             List[str]: List of posts forming the thread
         """
         # Implementation details...
         return [content]  # Placeholder return
-    
+
     def _generate_hashtags(self, content: str, limit: int = 5) -> List[str]:
         """Generate relevant hashtags for the content.
-        
+
         Args:
             content: The content to generate hashtags for
             limit: Maximum number of hashtags to generate
@@ -357,10 +361,10 @@ Note: When using emojis:
         """
         # Implementation details...
         return ["#placeholder"]  # Placeholder return
-    
+
     def generate_post(self, content: str, platform: str, tone: str = "neutral") -> str:
         """Generate a social media post for the specified platform.
-        
+
         Args:
             content: The topic or content to post about
             platform: The target social media platform
@@ -377,10 +381,10 @@ Note: When using emojis:
             "researched_content": "",
             "generated_content": "",
             "formatted_content": "",
-            "final_content": ""
+            "final_content": "",
         }
-        
+
         # Run the workflow
         final_state = self.graph.invoke(initial_state)
-        
-        return final_state["final_content"] 
+
+        return final_state["final_content"]
