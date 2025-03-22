@@ -22,10 +22,12 @@ TODO:
 - Implement cache monitoring
 """
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Any, TypeVar, Generic
 from datetime import datetime, timedelta
 
-class ResearchCache:
+T = TypeVar('T')
+
+class ResearchCache(Generic[T]):
     """Cache for storing research results with expiration.
     
     TODO:
@@ -51,10 +53,10 @@ class ResearchCache:
         Args:
             cache_duration: Duration in hours before cache entries expire (default: 24)
         """
-        self.cache: Dict[str, Dict] = {}
+        self.cache: Dict[str, Dict[str, Any]] = {}
         self.cache_duration = timedelta(hours=cache_duration)
     
-    def get(self, topic: str) -> Optional[Dict]:
+    def get(self, topic: str) -> Optional[Dict[str, Any]]:
         """Retrieve cached research results for a topic.
         
         This method checks if the topic exists in the cache and if its
@@ -65,7 +67,7 @@ class ResearchCache:
             topic: The topic to look up in the cache
             
         Returns:
-            Optional[Dict]: The cached research results if available and not expired,
+            Optional[Dict[str, Any]]: The cached research results if available and not expired,
                           None otherwise
         """
         if topic in self.cache:
@@ -78,7 +80,7 @@ class ResearchCache:
                 del self.cache[topic]
         return None
     
-    def set(self, topic: str, data: Dict) -> None:
+    def set(self, topic: str, data: Dict[str, Any]) -> None:
         """Store research results in the cache.
         
         This method stores research results for a topic along with a

@@ -21,12 +21,14 @@ TODO:
 - Add support for research validation
 """
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any, Union
 from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from langchain.tools import Tool
 from langchain_core.messages import HumanMessage, AIMessage
+from langchain.agents.agent_types import AgentType
+from langchain.agents.base import BaseAgent
 
 from .web_search import WebSearchTool
 from .research_cache import ResearchCache
@@ -125,7 +127,7 @@ For social media angles:
         )
         
         # Configure the agent executor with limits and verbosity
-        return AgentExecutor(
+        return AgentExecutor.from_agent_and_tools(
             agent=agent,
             tools=self.tools,
             verbose=True,

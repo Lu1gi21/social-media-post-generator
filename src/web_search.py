@@ -24,9 +24,9 @@ TODO:
 - Optimize memory usage in web scraping
 """
 
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any, Union
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from duckduckgo_search import DDGS
 import trafilatura
 from selenium import webdriver
@@ -86,7 +86,7 @@ class WebSearchTool:
             self._search_bing
         ]
     
-    def _setup_selenium(self):
+    def _setup_selenium(self) -> None:
         """Set up Selenium WebDriver for dynamic content scraping.
         
         Configures Chrome WebDriver with appropriate options for headless
@@ -127,7 +127,7 @@ class WebSearchTool:
                 - link: The result URL
                 - snippet: A brief description or excerpt
         """
-        results = []
+        results: List[Dict[str, str]] = []
         retry_count = 0
         
         while retry_count < max_retries:
@@ -171,8 +171,8 @@ class WebSearchTool:
                 if response.status_code == 200:
                     soup = BeautifulSoup(response.text, 'html.parser')
                     for result in soup.select('.result'):
-                        title_elem = result.select_one('.result__title a')
-                        snippet_elem = result.select_one('.result__snippet')
+                        title_elem: Optional[Tag] = result.select_one('.result__title a')
+                        snippet_elem: Optional[Tag] = result.select_one('.result__snippet')
                         
                         if title_elem:
                             result_dict = {
@@ -218,7 +218,7 @@ class WebSearchTool:
         Returns:
             List[Dict[str, str]]: List of search results
         """
-        results = []
+        results: List[Dict[str, str]] = []
         try:
             # Use Google Custom Search API or implement scraping
             # This is a placeholder for Google search implementation
@@ -245,7 +245,7 @@ class WebSearchTool:
         Returns:
             List[Dict[str, str]]: List of search results
         """
-        results = []
+        results: List[Dict[str, str]] = []
         try:
             # Use Bing Web Search API or implement scraping
             # This is a placeholder for Bing search implementation
@@ -270,7 +270,7 @@ class WebSearchTool:
             List[Dict[str, str]]: List of unique search results, limited to
                 max_results, each containing title, link, and snippet
         """
-        all_results = []
+        all_results: List[Dict[str, str]] = []
         
         # Try each search engine in sequence
         for search_engine in self.search_engines:
@@ -305,7 +305,7 @@ class WebSearchTool:
         
         # Remove duplicate results based on URL
         seen_urls = set()
-        unique_results = []
+        unique_results: List[Dict[str, str]] = []
         for result in all_results:
             if result['link'] not in seen_urls:
                 seen_urls.add(result['link'])
@@ -373,7 +373,7 @@ class WebSearchTool:
         results = self.search(query)
         
         # Scrape content from each result
-        documents = []
+        documents: List[Document] = []
         for result in results:
             try:
                 content = self.scrape_content(result['link'])
@@ -402,7 +402,7 @@ class WebSearchTool:
         
         return documents
     
-    def __del__(self):
+    def __del__(self) -> None:
         """Clean up resources when the object is destroyed.
         
         Ensures proper cleanup of the Selenium WebDriver to prevent
@@ -410,5 +410,5 @@ class WebSearchTool:
         """
         try:
             self.driver.quit()
-        except:
-            pass 
+        except Exception as e:
+            logger.error(f"Error cleaning up WebDriver: {str(e)}") 

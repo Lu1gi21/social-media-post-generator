@@ -37,7 +37,8 @@ jobs:
           
       - name: Install test dependencies
         run: |
-          pip install --only-binary :all: pytest pytest-cov flake8 bandit black isort mypy --verbose
+          pip install --only-binary :all: pytest pytest-cov flake8 bandit black isort mypy types-requests types-beautifulsoup4 --verbose
+          mypy --install-types
         timeout-minutes: 3  # Add timeout for this step
           
       - name: Create necessary directories
@@ -65,10 +66,10 @@ jobs:
       - name: Type checking
         run: |
           if [ -d "src" ]; then
-            mypy src/
+            mypy --ignore-missing-imports --disallow-untyped-defs --disallow-incomplete-defs --check-untyped-defs --disallow-untyped-decorators --no-implicit-optional --warn-redundant-casts --warn-unused-ignores --warn-no-return --warn-unreachable --warn-return-any src/
           fi
           if [ -d "tests" ]; then
-            mypy tests/
+            mypy --ignore-missing-imports --disallow-untyped-defs --disallow-incomplete-defs --check-untyped-defs --disallow-untyped-decorators --no-implicit-optional --warn-redundant-casts --warn-unused-ignores --warn-no-return --warn-unreachable --warn-return-any tests/
           fi
           
       - name: Run tests with coverage
