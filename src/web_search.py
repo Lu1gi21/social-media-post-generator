@@ -193,11 +193,11 @@ class WebSearchTool:
                                 if snippet_elem
                                 else ""
                             )
-                            
+
                             result_dict: Dict[str, str] = {
                                 "title": title_text,
                                 "link": link_text,
-                                "snippet": snippet_text
+                                "snippet": snippet_text,
                             }
                             results.append(result_dict)
 
