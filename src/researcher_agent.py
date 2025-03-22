@@ -64,7 +64,7 @@ class ResearcherAgent:
         self.llm = ChatOpenAI(model=model, temperature=0)
         self.tools = self._create_tools()
         self.agent = self._create_agent()
-        self.cache = ResearchCache(cache_duration)
+        self.cache: ResearchCache[Dict[str, str]] = ResearchCache(cache_duration)
 
     def _create_tools(self) -> List[Tool]:
         """Create the tools available to the researcher agent.

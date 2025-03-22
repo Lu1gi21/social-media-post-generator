@@ -188,7 +188,7 @@ class WebSearchTool:
                         )
 
                         if title_elem:
-                            result_dict = {
+                            result_dict: Dict[str, str] = {
                                 "title": title_elem.get_text(strip=True),
                                 "link": title_elem.get("href", ""),
                                 "snippet": (

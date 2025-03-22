@@ -98,7 +98,7 @@ def save_post(content: str, title: str, platform: str) -> None:
         print(f"Generated post saved to: {filepath}")
 
 
-def main():
+def main() -> None:
     """Main CLI entry point.
 
     TODO:
