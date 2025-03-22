@@ -19,6 +19,7 @@ TODO:
 import os
 import re
 from typing import Any, Dict, List, Optional, TypedDict, Union
+from dataclasses import dataclass
 
 from dotenv import load_dotenv
 from langgraph.graph import Graph, StateGraph
@@ -56,6 +57,65 @@ class AgentState(TypedDict):
     generated_content: str
     formatted_content: str
     final_content: str
+
+
+@dataclass
+class PlatformConfig:
+    """Configuration for a social media platform.
+    
+    Attributes:
+        emoji_support: Whether the platform supports emojis
+        max_length: Maximum post length
+        hashtag_support: Whether the platform supports hashtags
+        thread_support: Whether the platform supports threads
+    """
+    emoji_support: bool = False
+    max_length: int = 280
+    hashtag_support: bool = True
+    thread_support: bool = False
+
+
+class Config:
+    """Configuration class for social media platforms."""
+    
+    SUPPORTED_PLATFORMS = {
+        "twitter": PlatformConfig(
+            emoji_support=True,
+            max_length=280,
+            hashtag_support=True,
+            thread_support=True
+        ),
+        "facebook": PlatformConfig(
+            emoji_support=True,
+            max_length=63206,
+            hashtag_support=True,
+            thread_support=False
+        ),
+        "instagram": PlatformConfig(
+            emoji_support=True,
+            max_length=2200,
+            hashtag_support=True,
+            thread_support=False
+        ),
+        "linkedin": PlatformConfig(
+            emoji_support=False,
+            max_length=3000,
+            hashtag_support=True,
+            thread_support=False
+        )
+    }
+
+    @classmethod
+    def get_platform_config(cls, platform: str) -> PlatformConfig:
+        """Get configuration for a specific platform.
+        
+        Args:
+            platform: The platform name
+            
+        Returns:
+            PlatformConfig: The platform configuration
+        """
+        return cls.SUPPORTED_PLATFORMS.get(platform, PlatformConfig())
 
 
 class SocialMediaAgent:
@@ -98,9 +158,8 @@ class SocialMediaAgent:
             str: Content with optimized emoji usage, maintaining the original message
                 while enhancing engagement through strategic emoji placement
         """
-        # Skip optimization for platforms that don't support emojis
         platform_config = Config.get_platform_config(platform)
-        if not platform_config.get("emoji_support", False):
+        if not platform_config.emoji_support:
             return content
 
         messages: List[
@@ -300,12 +359,12 @@ Note: When using emojis:
         platform_config = Config.get_platform_config(platform)
 
         # Optimize emoji usage if supported
-        if platform_config.get("emoji_support", False):
+        if platform_config.emoji_support:
             content = self._optimize_emoji_usage(content, platform)
 
         # Apply platform-specific formatting
         formatted_content = content
-        if platform_config.get("hashtag_support", False):
+        if platform_config.hashtag_support:
             # Add hashtag optimization logic here
             pass
 

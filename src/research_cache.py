@@ -58,14 +58,10 @@ class ResearchCache(Generic[T]):
         self.cache_duration = timedelta(hours=cache_duration)
 
     def get(self, topic: str) -> Optional[Dict[str, Any]]:
-        """Retrieve cached research results for a topic.
-
-        This method checks if the topic exists in the cache and if its
-        entry has not expired. If the entry has expired, it is removed
-        from the cache.
+        """Get cached research results for a topic.
 
         Args:
-            topic: The topic to look up in the cache
+            topic: The research topic to look up
 
         Returns:
             Optional[Dict[str, Any]]: The cached research results if available and not expired,
@@ -75,7 +71,7 @@ class ResearchCache(Generic[T]):
             entry = self.cache[topic]
             # Check if the entry has expired
             if datetime.now() - entry["timestamp"] < self.cache_duration:
-                return entry["data"]
+                return entry["data"]  # type: ignore
             else:
                 # Remove expired entry
                 del self.cache[topic]

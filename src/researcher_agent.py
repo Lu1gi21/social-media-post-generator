@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain.agents.agent_types import AgentType
-from langchain.agents.base import BaseAgent
+from langchain.schema import BaseMessage
 from langchain.tools import Tool
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -133,7 +133,7 @@ For social media angles:
 
         # Configure the agent executor with limits and verbosity
         return AgentExecutor.from_agent_and_tools(
-            agent=agent,
+            agent=agent,  # type: ignore
             tools=self.tools,
             verbose=True,
             max_iterations=5,  # Limit the number of search attempts

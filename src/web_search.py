@@ -180,22 +180,14 @@ class WebSearchTool:
                 if response.status_code == 200:
                     soup = BeautifulSoup(response.text, "html.parser")
                     for result in soup.select(".result"):
-                        title_elem: Optional[Tag] = result.select_one(
-                            ".result__title a"
-                        )
-                        snippet_elem: Optional[Tag] = result.select_one(
-                            ".result__snippet"
-                        )
+                        title_elem = result.select_one(".result__title a")
+                        snippet_elem = result.select_one(".result__snippet")
 
                         if title_elem:
                             result_dict: Dict[str, str] = {
                                 "title": title_elem.get_text(strip=True),
                                 "link": title_elem.get("href", ""),
-                                "snippet": (
-                                    snippet_elem.get_text(strip=True)
-                                    if snippet_elem
-                                    else ""
-                                ),
+                                "snippet": snippet_elem.get_text(strip=True) if snippet_elem else "",
                             }
                             if result_dict["title"] and result_dict["link"]:
                                 results.append(result_dict)
