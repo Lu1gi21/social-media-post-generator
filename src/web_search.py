@@ -176,6 +176,7 @@ class WebSearchTool:
                 response = requests.get(url, headers=headers, timeout=10)
                 if response.status_code == 200:
                     soup = BeautifulSoup(response.text, "html.parser")
+                    results: List[Dict[str, str]] = []
                     for result in soup.select(".result"):
                         title_elem: Optional[Tag] = result.select_one(
                             ".result__title a"
@@ -198,10 +199,7 @@ class WebSearchTool:
                                 "link": link_text,
                                 "snippet": snippet_text
                             }
-                            
-                            if result_dict["title"] and result_dict["link"]:
-                                results.append(result_dict)
-                                logger.debug(f"Found result: {result_dict['title']}")
+                            results.append(result_dict)
 
                     if results:
                         logger.info(
