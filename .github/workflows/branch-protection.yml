@@ -6,6 +6,10 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   protect:
     runs-on: ubuntu-latest
@@ -13,6 +17,9 @@ jobs:
     
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -50,10 +57,10 @@ jobs:
           
       - name: Commit formatting changes
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add src/ tests/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Apply automatic code formatting" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "style: apply automatic code formatting" && git push)
           
       - name: Type checking
         run: |
