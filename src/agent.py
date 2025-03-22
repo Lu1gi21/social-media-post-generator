@@ -76,10 +76,10 @@ class PlatformConfig:
     thread_support: bool = False
 
 
-class Config:
+class PlatformSettings:
     """Configuration class for social media platforms."""
 
-    SUPPORTED_PLATFORMS = {
+    SUPPORTED_PLATFORMS: Dict[str, PlatformConfig] = {
         "twitter": PlatformConfig(
             emoji_support=True,
             max_length=280,
@@ -90,33 +90,38 @@ class Config:
             emoji_support=True,
             max_length=63206,
             hashtag_support=True,
+            thread_support=True,
+        ),
+        "linkedin": PlatformConfig(
+            emoji_support=True,
+            max_length=3000,
+            hashtag_support=True,
             thread_support=False,
         ),
         "instagram": PlatformConfig(
             emoji_support=True,
             max_length=2200,
             hashtag_support=True,
-            thread_support=False,
-        ),
-        "linkedin": PlatformConfig(
-            emoji_support=False,
-            max_length=3000,
-            hashtag_support=True,
-            thread_support=False,
+            thread_support=True,
         ),
     }
 
     @classmethod
     def get_platform_config(cls, platform: str) -> PlatformConfig:
-        """Get configuration for a specific platform.
+        """Get the configuration for a specific platform.
 
         Args:
-            platform: The platform name
+            platform: The name of the platform
 
         Returns:
-            PlatformConfig: The platform configuration
+            The platform configuration
+
+        Raises:
+            ValueError: If the platform is not supported
         """
-        return cls.SUPPORTED_PLATFORMS.get(platform, PlatformConfig())
+        if platform not in cls.SUPPORTED_PLATFORMS:
+            raise ValueError(f"Unsupported platform: {platform}")
+        return cls.SUPPORTED_PLATFORMS[platform]
 
 
 class SocialMediaAgent:
@@ -159,7 +164,7 @@ class SocialMediaAgent:
             str: Content with optimized emoji usage, maintaining the original message
                 while enhancing engagement through strategic emoji placement
         """
-        platform_config = Config.get_platform_config(platform)
+        platform_config = PlatformSettings.get_platform_config(platform)
         if not platform_config.emoji_support:
             return content
 
@@ -357,7 +362,7 @@ Note: When using emojis:
         """
         platform = state["platform"]
         content = state["generated_content"]
-        platform_config = Config.get_platform_config(platform)
+        platform_config = PlatformSettings.get_platform_config(platform)
 
         # Optimize emoji usage if supported
         if platform_config.emoji_support:
@@ -373,28 +378,31 @@ Note: When using emojis:
         return state
 
     def _validate_post(self, state: AgentState) -> AgentState:
-        """Validate the post against platform-specific rules and requirements.
-
-        This method ensures the post meets all platform-specific requirements,
-        including character limits, content guidelines, and formatting rules.
+        """Validate the post against platform-specific rules.
 
         Args:
-            state: Current state containing the formatted content and platform info
+            state: The current agent state
 
         Returns:
-            AgentState: Updated state containing the validated content
+            Updated agent state with validated content
         """
-        platform = state["platform"]
-        content = state["formatted_content"]
-        platform_config = Config.get_platform_config(platform)
+        platform_config = PlatformSettings.get_platform_config(state["platform"])
+        
+        # Check length
+        if len(state["formatted_content"]) > platform_config.max_length:
+            if platform_config.thread_support:
+                state["formatted_content"] = self._split_into_thread(state["formatted_content"])[0]
+            else:
+                state["formatted_content"] = state["formatted_content"][:platform_config.max_length]
 
-        # Apply platform-specific validation rules
-        validation_rules = platform_config.get("validation_rules", {})
-        if validation_rules:
-            # Add validation logic here
-            pass
+        # Add hashtags if supported
+        if platform_config.hashtag_support:
+            hashtags = self._generate_hashtags(state["formatted_content"])
+            hashtag_text = " ".join(hashtags)
+            if len(state["formatted_content"] + " " + hashtag_text) <= platform_config.max_length:
+                state["formatted_content"] += f"\n\n{hashtag_text}"
 
-        state["final_content"] = content
+        state["final_content"] = state["formatted_content"]
         return state
 
     def _split_into_thread(self, content: str) -> List[str]:
@@ -423,27 +431,16 @@ Note: When using emojis:
         return ["#placeholder"]  # Placeholder return
 
     def generate_post(self, content: str, platform: str, tone: str = "neutral") -> str:
-        """Generate a social media post for the specified platform.
-
-        This method orchestrates the entire post generation process, from research
-        to final validation, using the LangGraph workflow.
+        """Generate a social media post.
 
         Args:
-            content: The topic or content to be posted
+            content: The topic or content to post about
             platform: The target social media platform
-            tone: The desired tone of the post (default: "neutral")
+            tone: The desired tone of the post
 
         Returns:
-            str: The final, validated post content ready for publishing
-
-        Raises:
-            ValueError: If the platform is not supported or if required parameters are missing
+            The generated post content
         """
-        # Validate platform
-        if platform not in Config.SUPPORTED_PLATFORMS:
-            raise ValueError(f"Unsupported platform: {platform}")
-
-        # Initialize state
         initial_state: AgentState = {
             "content": content,
             "platform": platform,
@@ -454,7 +451,6 @@ Note: When using emojis:
             "final_content": "",
         }
 
-        # Run the workflow
-        final_state = self.graph.invoke(initial_state)
-
+        graph = self._create_graph()
+        final_state = graph.invoke(initial_state)
         return final_state["final_content"]
