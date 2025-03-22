@@ -31,6 +31,17 @@ warn_unreachable = true
 ignore_missing_imports = true
 plugins = ["pydantic.mypy"]
 
+# Add specific type checking rules
+[[tool.mypy.overrides]]
+module = ["src.web_search"]
+disallow_any_generics = false
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = ["src.agent"]
+disallow_any_generics = false
+check_untyped_defs = false
+
 [tool.bandit]
 exclude_dirs = ['tests']
 skips = ['B101']

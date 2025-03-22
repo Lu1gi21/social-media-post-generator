@@ -452,5 +452,5 @@ Note: When using emojis:
         }
 
         graph = self._create_graph()
-        final_state = graph.invoke(initial_state)
+        final_state: AgentState = graph.invoke(initial_state)
         return final_state["final_content"]
