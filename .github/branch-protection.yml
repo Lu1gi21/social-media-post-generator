@@ -7,7 +7,12 @@ branches:
       required_status_checks:
         strict: true
         contexts:
-          - Branch Protection
+          - "Check code formatting"
+          - "Type checking"
+          - "Run tests with coverage"
+          - "Check code style"
+          - "Security scan"
+          - "Upload coverage report"
       required_pull_request_reviews:
         required_approving_review_count: 1
         dismiss_stale_reviews: true
