@@ -387,19 +387,26 @@ Note: When using emojis:
             Updated agent state with validated content
         """
         platform_config = PlatformSettings.get_platform_config(state["platform"])
-        
+
         # Check length
         if len(state["formatted_content"]) > platform_config.max_length:
             if platform_config.thread_support:
-                state["formatted_content"] = self._split_into_thread(state["formatted_content"])[0]
+                state["formatted_content"] = self._split_into_thread(
+                    state["formatted_content"]
+                )[0]
             else:
-                state["formatted_content"] = state["formatted_content"][:platform_config.max_length]
+                state["formatted_content"] = state["formatted_content"][
+                    : platform_config.max_length
+                ]
 
         # Add hashtags if supported
         if platform_config.hashtag_support:
             hashtags = self._generate_hashtags(state["formatted_content"])
             hashtag_text = " ".join(hashtags)
-            if len(state["formatted_content"] + " " + hashtag_text) <= platform_config.max_length:
+            if (
+                len(state["formatted_content"] + " " + hashtag_text)
+                <= platform_config.max_length
+            ):
                 state["formatted_content"] += f"\n\n{hashtag_text}"
 
         state["final_content"] = state["formatted_content"]
