@@ -187,7 +187,11 @@ class WebSearchTool:
                             result_dict: Dict[str, str] = {
                                 "title": title_elem.get_text(strip=True),
                                 "link": title_elem.get("href", ""),
-                                "snippet": snippet_elem.get_text(strip=True) if snippet_elem else "",
+                                "snippet": (
+                                    snippet_elem.get_text(strip=True)
+                                    if snippet_elem
+                                    else ""
+                                ),
                             }
                             if result_dict["title"] and result_dict["link"]:
                                 results.append(result_dict)
