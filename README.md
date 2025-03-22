@@ -2,7 +2,11 @@
 
 An AI-powered tool that generates platform-specific social media posts with integrated web research capabilities and Gen Z optimization.
 
-## Features
+## About
+
+Social Media Post Generator is a powerful tool designed to help content creators, marketers, and social media managers create engaging, platform-optimized content. It leverages advanced AI technology to research topics, generate content, and format posts according to each platform's best practices.
+
+### Key Features
 
 - **Intelligent Research**: Uses AI to gather and analyze information from the web
 - **Platform-Specific Formatting**: Optimizes content for different social media platforms
@@ -269,18 +273,18 @@ For a complete list of dependencies, see `requirements.txt`.
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## Security
+
+For security concerns, please see our [Security Policy](SECURITY.md).
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
-- OpenAI for GPT models
-- LangChain for the agent framework
-- DuckDuckGo for web search capabilities 
+- OpenAI for providing the GPT models
+- The open-source community for various tools and libraries
+- Contributors and maintainers of this project 
