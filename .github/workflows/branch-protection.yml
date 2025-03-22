@@ -62,6 +62,7 @@ jobs:
           fi
           
       - name: Run tests with coverage
+        id: test
         run: |
           if [ -d "tests" ]; then
             pytest --cov=src/ --cov-report=xml tests/
@@ -85,7 +86,7 @@ jobs:
           fi
           
       - name: Upload coverage report
-        if: success() && fileExists('./coverage.xml')
+        if: success() && steps.test.outcome == 'success'
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.xml
