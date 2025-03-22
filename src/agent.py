@@ -103,7 +103,9 @@ class SocialMediaAgent:
         if not platform_config.get("emoji_support", False):
             return content
 
-        messages: List[Union[ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam]] = [
+        messages: List[
+            Union[ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam]
+        ] = [
             {
                 "role": "system",
                 "content": f"""You are a Gen Z emoji optimization expert. 
@@ -211,7 +213,9 @@ Please provide a comprehensive analysis focusing on:
 Format the response in a clear, structured way that will help create engaging social media content."""
 
         # Generate analysis using GPT
-        messages: List[Union[ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam]] = [
+        messages: List[
+            Union[ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam]
+        ] = [
             {
                 "role": "system",
                 "content": "You are a social media content strategist specializing in analyzing research and identifying the most engaging aspects for social media posts.",
@@ -263,7 +267,9 @@ Note: When using emojis:
 - Use combinations when appropriate"""
 
         # Generate content using GPT
-        messages: List[Union[ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam]] = [
+        messages: List[
+            Union[ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam]
+        ] = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": full_content},
         ]
@@ -356,9 +362,7 @@ Note: When using emojis:
         # Implementation details...
         return ["#placeholder"]  # Placeholder return
 
-    def generate_post(
-        self, content: str, platform: str, tone: str = "neutral"
-    ) -> str:
+    def generate_post(self, content: str, platform: str, tone: str = "neutral") -> str:
         """Generate a social media post for the specified platform.
 
         This method orchestrates the entire post generation process, from research
