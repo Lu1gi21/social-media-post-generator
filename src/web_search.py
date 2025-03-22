@@ -176,20 +176,20 @@ class WebSearchTool:
                 response = requests.get(url, headers=headers, timeout=10)
                 if response.status_code == 200:
                     soup = BeautifulSoup(response.text, "html.parser")
-                    results: List[Dict[str, str]] = []
-                    for result in soup.select(".result"):
-                        title_elem: Optional[Tag] = result.select_one(
+                    web_results: List[Dict[str, str]] = []
+                    for result_elem in soup.select(".result"):
+                        title_elem: Optional[Tag] = result_elem.select_one(
                             ".result__title a"
                         )
-                        snippet_elem: Optional[Tag] = result.select_one(
+                        snippet_elem: Optional[Tag] = result_elem.select_one(
                             ".result__snippet"
                         )
 
                         if title_elem:
                             title_text: str = title_elem.get_text(strip=True)
-                            link_text: str = title_elem.get("href", "")
+                            link_text: str = str(title_elem.get("href", ""))
                             snippet_text: str = (
-                                snippet_elem.get_text(strip=True)
+                                str(snippet_elem.get_text(strip=True))
                                 if snippet_elem
                                 else ""
                             )
@@ -199,12 +199,13 @@ class WebSearchTool:
                                 "link": link_text,
                                 "snippet": snippet_text,
                             }
-                            results.append(result_dict)
+                            web_results.append(result_dict)
 
-                    if results:
+                    if web_results:
                         logger.info(
-                            f"Successfully found {len(results)} results using alternative method"
+                            f"Successfully found {len(web_results)} results using alternative method"
                         )
+                        results.extend(web_results)
                         break
 
             except Exception as e:
