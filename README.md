@@ -254,6 +254,8 @@ Formatting rules and prompts can be customized in `src/prompts.py`:
 
 ## Development
 
+See our [Development Roadmap](TODO.md) for planned features and improvements.
+
 ### Running Tests
 ```powershell
 python -m pytest tests/
