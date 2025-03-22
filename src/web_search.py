@@ -27,7 +27,7 @@ TODO:
 import logging
 import random
 import time
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 from urllib.parse import quote_plus
 
 import requests
