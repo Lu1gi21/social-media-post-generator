@@ -37,20 +37,23 @@ jobs:
         run: |
           mkdir -p src tests
           
-      - name: Check code formatting
+      - name: Format code
         run: |
           if [ -d "src" ]; then
-            black --check src/
+            black src/
+            isort src/
           fi
           if [ -d "tests" ]; then
-            black --check tests/
+            black tests/
+            isort tests/
           fi
-          if [ -d "src" ]; then
-            isort --check-only src/
-          fi
-          if [ -d "tests" ]; then
-            isort --check-only tests/
-          fi
+          
+      - name: Commit formatting changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add src/ tests/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Apply automatic code formatting" && git push)
           
       - name: Type checking
         run: |
