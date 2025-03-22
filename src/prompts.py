@@ -1,10 +1,26 @@
-"""System and user prompts for the social media post generator."""
+"""System and user prompts for the social media post generator.
+
+This module contains a collection of prompts and formatting guidelines used by the
+social media post generator to create platform-specific content. It includes system
+prompts for different platforms, emoji guides, and user prompt templates.
+
+The prompts are designed to ensure consistent, engaging, and platform-appropriate
+content generation across different social media platforms.
+"""
 
 from typing import Dict
 
 class Prompts:
-    """Collection of prompts for different social media platforms."""
+    """Collection of prompts for different social media platforms.
     
+    This class provides a centralized repository of prompts and formatting guidelines
+    for generating social media content across different platforms. It includes:
+    - Platform-specific system prompts
+    - Emoji usage guidelines
+    - User prompt templates
+    """
+    
+    # Comprehensive guide for Gen Z emoji usage across platforms
     GENZ_EMOJI_GUIDE = """
     Emotions & Reactions:
     🫡 - Saluting, respect
@@ -36,6 +52,7 @@ class Prompts:
     🫣😮‍💨 - Can't believe it
     """
     
+    # Platform-specific system prompts with formatting guidelines
     SYSTEM_PROMPTS = {
         "instagram": """Format:
 - Max 30 hashtags
@@ -103,7 +120,20 @@ class Prompts:
 
     @staticmethod
     def get_user_prompt(content: str, platform: str, tone: str = "neutral") -> str:
-        """Generate a user prompt for the given content and platform."""
+        """Generate a user prompt for the given content and platform.
+        
+        This method creates a structured prompt that guides the content generation
+        process while maintaining platform-specific requirements and desired tone.
+        
+        Args:
+            content: The main content or topic to be posted
+            platform: The target social media platform
+            tone: The desired tone of the post (default: "neutral")
+            
+        Returns:
+            str: A formatted prompt that includes content, platform requirements,
+                and generation guidelines
+        """
         return f"""Create {tone} tone {platform} post with:
 {content}
 

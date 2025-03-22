@@ -2,7 +2,23 @@
 Researcher agent implementation for gathering and analyzing information.
 
 This module provides a dedicated researcher agent that uses web search and
-scraping capabilities to gather comprehensive information about topics.
+scraping capabilities to gather comprehensive information about topics. The agent
+uses LangChain for orchestration and includes caching to optimize performance.
+
+The agent is designed to:
+- Perform focused web searches
+- Extract and analyze relevant information
+- Structure findings for social media content
+- Cache results to avoid redundant searches
+
+TODO:
+- Add support for academic paper search
+- Implement sentiment analysis for research
+- Add support for competitor analysis
+- Implement trend prediction
+- Add support for custom research templates
+- Implement research quality scoring
+- Add support for research validation
 """
 
 from typing import Dict, List, Optional
@@ -16,15 +32,28 @@ from .web_search import WebSearchTool
 from .research_cache import ResearchCache
 
 class ResearcherAgent:
-    """Agent specialized in gathering and analyzing information from various sources."""
+    """Agent specialized in gathering and analyzing information from various sources.
+    
+    This class implements a research agent that combines web search capabilities
+    with AI-powered analysis to gather comprehensive information about topics.
+    It uses LangChain for orchestration and includes caching to optimize performance.
+    
+    The agent is designed to:
+    - Perform focused web searches
+    - Extract and analyze relevant information
+    - Structure findings for social media content
+    - Cache results to avoid redundant searches
+    """
     
     def __init__(self, model: str = "gpt-4o-mini", cache_duration: int = 24):
-        """
-        Initialize the researcher agent.
+        """Initialize the researcher agent.
+        
+        Sets up the agent with web search capabilities, LLM for analysis,
+        and caching mechanism for optimized performance.
         
         Args:
-            model (str): The OpenAI model to use for analysis
-            cache_duration (int): Duration in hours before cache entries expire
+            model: The OpenAI model to use for analysis (default: "gpt-4o-mini")
+            cache_duration: Duration in hours before cache entries expire (default: 24)
         """
         self.model = model
         self.web_search = WebSearchTool(max_results=5)
@@ -34,11 +63,13 @@ class ResearcherAgent:
         self.cache = ResearchCache(cache_duration)
         
     def _create_tools(self) -> List[Tool]:
-        """
-        Create the tools available to the researcher agent.
+        """Create the tools available to the researcher agent.
+        
+        This method sets up the tools that the agent can use for research,
+        currently including web search and content scraping capabilities.
         
         Returns:
-            List[Tool]: List of tools for the agent to use.
+            List[Tool]: List of configured tools for the agent to use
         """
         return [
             Tool(
@@ -51,11 +82,13 @@ class ResearcherAgent:
         ]
     
     def _create_agent(self) -> AgentExecutor:
-        """
-        Create the researcher agent with its tools and prompt.
+        """Create the researcher agent with its tools and prompt.
+        
+        This method configures the LangChain agent with appropriate tools,
+        prompts, and execution parameters for effective research.
         
         Returns:
-            AgentExecutor: The configured agent executor.
+            AgentExecutor: The configured agent executor ready for research tasks
         """
         prompt = ChatPromptTemplate.from_messages([
             ("system", """Research assistant for gathering and analyzing information.
@@ -84,12 +117,14 @@ For social media angles:
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ])
         
+        # Create the agent with OpenAI functions
         agent = create_openai_functions_agent(
             llm=self.llm,
             tools=self.tools,
             prompt=prompt
         )
         
+        # Configure the agent executor with limits and verbosity
         return AgentExecutor(
             agent=agent,
             tools=self.tools,
@@ -98,22 +133,37 @@ For social media angles:
         )
     
     def research_topic(self, topic: str, focus_areas: Optional[List[str]] = None) -> Dict[str, str]:
-        """
-        Research a topic and provide structured information.
+        """Research a topic and provide structured information.
+        
+        TODO:
+        - Add support for competitor analysis
+        - Implement trend prediction
+        - Add support for custom research templates
+        - Implement research quality scoring
+        - Add support for research validation
+        - Implement proper error recovery
+        - Add support for research history
         
         Args:
-            topic (str): The topic to research
-            focus_areas (Optional[List[str]]): Specific areas to focus on
+            topic: The topic to research
+            focus_areas: Optional list of specific areas to focus on during research
             
         Returns:
-            Dict[str, str]: Structured research results
+            Dict[str, str]: Structured research results containing:
+                - summary: Main overview of the topic
+                - key_facts: Important facts and points
+                - trends: Current trends and developments
+                - sources: References and sources used
+                
+        Note:
+            If research fails, returns a default structure with error information
         """
-        # Check cache first
+        # Check cache first to avoid redundant searches
         cached_results = self.cache.get(topic)
         if cached_results:
             return cached_results
         
-        # Create research query
+        # Create research query with optional focus areas
         query = f"Research about {topic}"
         if focus_areas:
             query += f" focusing on: {', '.join(focus_areas)}"
@@ -128,7 +178,7 @@ For social media angles:
             # Process and structure the results
             research_output = result["output"]
             
-            # Extract key components
+            # Extract key components into structured format
             structured_output = {
                 "summary": self._extract_summary(research_output),
                 "key_facts": self._extract_key_facts(research_output),
@@ -136,7 +186,7 @@ For social media angles:
                 "sources": self._extract_sources(research_output)
             }
             
-            # Cache the results
+            # Cache the results for future use
             self.cache.set(topic, structured_output)
             
             return structured_output
@@ -152,11 +202,28 @@ For social media angles:
             }
     
     def _extract_summary(self, text: str) -> str:
-        """Extract the main summary from the research output."""
+        """Extract the main summary from the research output.
+        
+        Args:
+            text: The research output text
+            
+        Returns:
+            str: The first paragraph as the main summary, or the entire text if no paragraphs
+        """
         return text.split("\n\n")[0] if "\n\n" in text else text
     
     def _extract_key_facts(self, text: str) -> str:
-        """Extract key facts from the research output."""
+        """Extract key facts from the research output.
+        
+        This method identifies and extracts lines that contain key facts,
+        looking for common indicators like bullet points or fact markers.
+        
+        Args:
+            text: The research output text
+            
+        Returns:
+            str: Extracted key facts, or a default message if none found
+        """
         facts_section = ""
         for line in text.split("\n"):
             if line.lower().startswith(("key fact", "fact:", "•", "-")):
@@ -164,7 +231,17 @@ For social media angles:
         return facts_section.strip() or "No key facts found."
     
     def _extract_trends(self, text: str) -> str:
-        """Extract trends from the research output."""
+        """Extract trends from the research output.
+        
+        This method identifies and extracts lines that contain trend information,
+        looking for common indicators of trend-related content.
+        
+        Args:
+            text: The research output text
+            
+        Returns:
+            str: Extracted trends, or a default message if none found
+        """
         trends_section = ""
         for line in text.split("\n"):
             if line.lower().startswith(("trend:", "current trend", "developing:")):
@@ -172,7 +249,17 @@ For social media angles:
         return trends_section.strip() or "No trends found."
     
     def _extract_sources(self, text: str) -> str:
-        """Extract sources from the research output."""
+        """Extract sources from the research output.
+        
+        This method identifies and extracts lines that contain source information,
+        looking for common indicators of source citations.
+        
+        Args:
+            text: The research output text
+            
+        Returns:
+            str: Extracted sources, or a default message if none found
+        """
         sources_section = ""
         for line in text.split("\n"):
             if line.lower().startswith(("source:", "reference:", "from:", "via:")):
