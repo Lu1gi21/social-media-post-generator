@@ -10,16 +10,17 @@ content generation across different social media platforms.
 
 from typing import Dict
 
+
 class Prompts:
     """Collection of prompts for different social media platforms.
-    
+
     This class provides a centralized repository of prompts and formatting guidelines
     for generating social media content across different platforms. It includes:
     - Platform-specific system prompts
     - Emoji usage guidelines
     - User prompt templates
     """
-    
+
     # Comprehensive guide for Gen Z emoji usage across platforms
     GENZ_EMOJI_GUIDE = """
     Emotions & Reactions:
@@ -51,7 +52,7 @@ class Prompts:
     🫡💯 - Respect
     🫣😮‍💨 - Can't believe it
     """
-    
+
     # Platform-specific system prompts with formatting guidelines
     SYSTEM_PROMPTS = {
         "instagram": """Format:
@@ -69,7 +70,6 @@ class Prompts:
   * Current references
   * Strategic emojis
   * Authentic voice""",
-
         "linkedin": """Format:
 - Max 5 hashtags
 - Rich formatting
@@ -85,7 +85,6 @@ class Prompts:
   * Thoughtful analysis
   * Current trends
   * Strategic emojis""",
-
         "facebook": """Format:
 - Max 10 hashtags
 - Rich formatting
@@ -101,7 +100,6 @@ class Prompts:
   * Current events
   * Authentic voice
   * Strategic emojis""",
-
         "x": """Format:
 - Max 5 hashtags
 - 280 char limit per tweet
@@ -115,21 +113,21 @@ class Prompts:
   * Modern language
   * Relatable content
   * Strategic emojis
-  * Clear thread flow"""
+  * Clear thread flow""",
     }
 
     @staticmethod
     def get_user_prompt(content: str, platform: str, tone: str = "neutral") -> str:
         """Generate a user prompt for the given content and platform.
-        
+
         This method creates a structured prompt that guides the content generation
         process while maintaining platform-specific requirements and desired tone.
-        
+
         Args:
             content: The main content or topic to be posted
             platform: The target social media platform
             tone: The desired tone of the post (default: "neutral")
-            
+
         Returns:
             str: A formatted prompt that includes content, platform requirements,
                 and generation guidelines
@@ -149,4 +147,4 @@ Format:
 9. Natural language
 10. Relatable content
 11. Current topics
-12. Authentic voice""" 
+12. Authentic voice"""

@@ -26,12 +26,13 @@ from openai import OpenAI
 
 from .config import Config
 from .prompts import Prompts
-from .web_search import WebSearchTool
 from .researcher_agent import ResearcherAgent
+from .web_search import WebSearchTool
+
 
 class AgentState(TypedDict):
     """Type definition for the agent's state.
-    
+
     Attributes:
         content: The original topic or content to be posted
         platform: The target social media platform
@@ -41,6 +42,7 @@ class AgentState(TypedDict):
         formatted_content: Content after platform-specific formatting
         final_content: The final validated and ready-to-post content
     """
+
     content: str
     platform: str
     tone: str
@@ -49,12 +51,13 @@ class AgentState(TypedDict):
     formatted_content: str
     final_content: str
 
+
 class SocialMediaAgent:
     """Agent for generating platform-specific social media posts.
-    
+
     This class implements a workflow-based approach to social media post generation,
     handling research, content creation, formatting, and validation in a structured manner.
-    
+
     The agent uses LangGraph for workflow management and OpenAI's GPT models for content
     generation. It supports multiple social media platforms with platform-specific
     optimizations and constraints.
@@ -62,7 +65,7 @@ class SocialMediaAgent:
     
     def __init__(self) -> None:
         """Initialize the social media agent.
-        
+
         Sets up the OpenAI client, researcher agent, and workflow graph.
         Also initializes the emoji guide for Gen Z style optimization.
         """
@@ -70,21 +73,21 @@ class SocialMediaAgent:
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.researcher = ResearcherAgent()  # Single instance for all platforms
         self.graph = self._create_graph()
-        
+
         # Cache the emoji guide for reuse across all content generation
         self.emoji_guide = Prompts.GENZ_EMOJI_GUIDE
-        
+
     def _optimize_emoji_usage(self, content: str, platform: str) -> str:
         """Optimize emoji usage in the content based on platform and Gen Z style.
-        
+
         This method uses GPT to analyze and enhance emoji usage in the content,
         ensuring it aligns with platform-specific best practices and Gen Z communication
         patterns.
-        
+
         Args:
             content: The post content to optimize
             platform: The social media platform for which to optimize
-            
+
         Returns:
             str: Content with optimized emoji usage, maintaining the original message
                 while enhancing engagement through strategic emoji placement
@@ -92,11 +95,13 @@ class SocialMediaAgent:
         # Skip optimization for platforms that don't support emojis
         if not Config.get_platform_config(platform).emoji_support:
             return content
-            
+
         response = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": f"""You are a Gen Z emoji optimization expert. 
+                {
+                    "role": "system",
+                    "content": f"""You are a Gen Z emoji optimization expert. 
                 Use this guide to optimize emoji usage in the content:
                 {self.emoji_guide}
                 
@@ -105,69 +110,73 @@ class SocialMediaAgent:
                 2. Match the platform's vibe (e.g., more professional for LinkedIn)
                 3. Don't overuse emojis
                 4. Use combinations when appropriate
-                5. Keep the original message intact"""},
-                {"role": "user", "content": f"Optimize emoji usage in this content for {platform}:\n\n{content}"}
-            ]
+                5. Keep the original message intact""",
+                },
+                {
+                    "role": "user",
+                    "content": f"Optimize emoji usage in this content for {platform}:\n\n{content}",
+                },
+            ],
         )
         
         return response.choices[0].message.content or content
         
     def _create_graph(self) -> Graph:
         """Create the LangGraph workflow for post generation.
-        
+
         This method sets up the workflow graph that defines the sequence of operations
         for post generation, including research, content generation, formatting, and
         validation steps.
-        
+
         Returns:
             Graph: A compiled LangGraph workflow defining the post generation process
         """
         workflow = StateGraph(AgentState)
-        
+
         # Add nodes for different stages of post generation
         workflow.add_node("research_topic", self._research_topic)
         workflow.add_node("generate_content", self._generate_content)
         workflow.add_node("format_post", self._format_post)
         workflow.add_node("validate_post", self._validate_post)
-        
+
         # Define edges and flow between stages
         workflow.add_edge("research_topic", "generate_content")
         workflow.add_edge("generate_content", "format_post")
         workflow.add_edge("format_post", "validate_post")
-        
+
         # Set entry and exit points for the workflow
         workflow.set_entry_point("research_topic")
         workflow.set_finish_point("validate_post")
-        
+
         return workflow.compile()
-    
+
     def _research_topic(self, state: AgentState) -> AgentState:
         """Research the topic to gather relevant information.
-        
+
         This method performs comprehensive research on the given topic, focusing on
         current developments, key statistics, relevant context, and social media angles.
         The research results are then analyzed to identify the most engaging aspects
         for social media content.
-        
+
         Args:
             state: Current state of the workflow containing the topic to research
-            
+
         Returns:
             AgentState: Updated state containing the researched content and analysis
         """
         topic = state["content"]
-        
+
         # Define focus areas for comprehensive research
         focus_areas = [
             "current developments",
             "key statistics",
             "relevant context",
-            "social media angles"
+            "social media angles",
         ]
-        
+
         # Perform research using the researcher agent
         research_results = self.researcher.research_topic(topic, focus_areas)
-        
+
         # Create a structured prompt for analyzing research results
         research_prompt = f"""Based on the following research about {topic}:
 
@@ -196,24 +205,27 @@ Format the response in a clear, structured way that will help create engaging so
         response = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a social media content strategist specializing in analyzing research and identifying the most engaging aspects for social media posts."},
-                {"role": "user", "content": research_prompt}
-            ]
+                {
+                    "role": "system",
+                    "content": "You are a social media content strategist specializing in analyzing research and identifying the most engaging aspects for social media posts.",
+                },
+                {"role": "user", "content": research_prompt},
+            ],
         )
         
         state["researched_content"] = response.choices[0].message.content or ""
         return state
-    
+
     def _generate_content(self, state: AgentState) -> AgentState:
         """Generate the initial content for the post.
-        
+
         This method creates the initial content for the social media post using the
         researched information and platform-specific requirements. It also handles
         emoji optimization for platforms that support it.
-        
+
         Args:
             state: Current state containing the topic, platform, and researched content
-            
+
         Returns:
             AgentState: Updated state containing the generated content
         """
@@ -221,7 +233,7 @@ Format the response in a clear, structured way that will help create engaging so
         topic = state["content"]
         researched_content = state["researched_content"]
         tone = state.get("tone", "neutral")
-        
+
         # Combine topic and research for comprehensive context
         full_content = f"""Topic: {topic}
 
@@ -229,7 +241,7 @@ Research:
 {researched_content}
 
 Please create a social media post based on this information."""
-        
+
         # Apply platform-specific prompt with emoji guidance
         system_prompt = f"""{Prompts.SYSTEM_PROMPTS[platform]}
 
@@ -238,19 +250,22 @@ Note: When using emojis:
 - Match the platform's vibe
 - Don't overuse them
 - Use combinations when appropriate"""
-        
+
         # Generate initial content
         response = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": Prompts.get_user_prompt(full_content, platform, tone)}
-            ]
+                {
+                    "role": "user",
+                    "content": Prompts.get_user_prompt(full_content, platform, tone),
+                },
+            ],
         )
         
         state["generated_content"] = response.choices[0].message.content or ""
         return state
-    
+
     def _format_post(self, state: AgentState) -> AgentState:
         """Format the post according to platform-specific requirements.
         
@@ -260,7 +275,7 @@ Note: When using emojis:
         
         Args:
             state: Current state containing the generated content and platform info
-            
+
         Returns:
             AgentState: Updated state containing the formatted content
         """
@@ -281,7 +296,7 @@ Note: When using emojis:
         
         state["formatted_content"] = formatted_content
         return state
-    
+
     def _validate_post(self, state: AgentState) -> AgentState:
         """Validate the post against platform-specific rules and requirements.
         
@@ -317,7 +332,7 @@ Note: When using emojis:
         
         state["final_content"] = response.choices[0].message.content or content
         return state
-    
+
     def _split_into_thread(self, content: str) -> List[str]:
         """Split content into a thread of posts if it exceeds platform limits.
         
@@ -336,7 +351,7 @@ Note: When using emojis:
         Args:
             content: The content to generate hashtags for
             limit: Maximum number of hashtags to generate
-            
+
         Returns:
             List[str]: List of generated hashtags
         """
@@ -350,7 +365,7 @@ Note: When using emojis:
             content: The topic or content to post about
             platform: The target social media platform
             tone: The desired tone of the post (default: "neutral")
-            
+
         Returns:
             str: The generated social media post
         """
