@@ -22,13 +22,13 @@ jobs:
           
       - name: Install core dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt --verbose
         timeout-minutes: 5  # Add timeout for this step
           
       - name: Install test dependencies
         run: |
-          pip install pytest pytest-cov flake8 bandit black isort mypy
+          pip install pytest pytest-cov flake8 bandit black isort mypy --verbose
         timeout-minutes: 3  # Add timeout for this step
           
       - name: Check code formatting
