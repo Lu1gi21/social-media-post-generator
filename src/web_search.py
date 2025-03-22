@@ -192,13 +192,13 @@ class WebSearchTool:
                                 if snippet_elem
                                 else ""
                             )
-                            
+
                             result_dict: Dict[str, str] = {
                                 "title": title_text,
                                 "link": link_text,
-                                "snippet": snippet_text
+                                "snippet": snippet_text,
                             }
-                            
+
                             if result_dict["title"] and result_dict["link"]:
                                 results.append(result_dict)
                                 logger.debug(f"Found result: {result_dict['title']}")
