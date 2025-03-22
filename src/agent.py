@@ -17,6 +17,7 @@ TODO:
 """
 
 import os
+import re
 from typing import Dict, Any, List, TypedDict
 from dotenv import load_dotenv
 from langgraph.graph import Graph, StateGraph
@@ -317,12 +318,12 @@ Note: When using emojis:
     def _split_into_thread(self, content: str) -> List[str]:
         """Split content into a thread of tweets for X/Twitter.
         
-        TODO:
-        - Implement proper thread splitting logic
-        - Handle media attachments in threads
-        - Add support for thread preview
-        - Implement proper context maintenance across tweets
-        - Add support for custom thread templates
+        This method splits long content into a thread of tweets while maintaining
+        context and following X/Twitter's best practices. It handles:
+        - Character limits (280 chars per tweet)
+        - Thread context markers (🧵, 1/N, etc.)
+        - Hashtag placement
+        - Natural break points
         
         Args:
             content: The content to split into tweets
@@ -330,8 +331,64 @@ Note: When using emojis:
         Returns:
             List[str]: List of tweets forming the thread
         """
-        # Implementation details...
-        pass
+        # Constants
+        MAX_TWEET_LENGTH = 280
+        THREAD_MARKER = "🧵"
+        HASHTAG_PATTERN = r'#\w+'
+        
+        # Extract hashtags from the content
+        hashtags = re.findall(HASHTAG_PATTERN, content)
+        content = re.sub(HASHTAG_PATTERN, '', content).strip()
+        
+        # Split content into sentences for natural breaks
+        sentences = re.split(r'(?<=[.!?])\s+', content)
+        
+        tweets = []
+        current_tweet = ""
+        tweet_count = 0
+        
+        # Process each sentence
+        for sentence in sentences:
+            # Calculate potential tweet length with thread marker and counter
+            potential_length = len(current_tweet) + len(sentence) + 1  # +1 for space
+            counter_text = f" ({tweet_count + 1}/N)" if tweet_count > 0 else ""
+            
+            # If adding this sentence would exceed the limit
+            if potential_length + len(counter_text) > MAX_TWEET_LENGTH:
+                # Save current tweet if not empty
+                if current_tweet:
+                    tweet_count += 1
+                    tweets.append(current_tweet.strip())
+                
+                # Start new tweet with this sentence
+                current_tweet = sentence
+            else:
+                # Add sentence to current tweet
+                current_tweet += " " + sentence if current_tweet else sentence
+        
+        # Add the last tweet if not empty
+        if current_tweet:
+            tweet_count += 1
+            tweets.append(current_tweet.strip())
+        
+        # Add thread markers and counters
+        for i, tweet in enumerate(tweets):
+            # Add thread marker to first tweet
+            if i == 0:
+                tweet = f"{tweet} {THREAD_MARKER}"
+            
+            # Add counter to all tweets
+            tweet = f"{tweet} ({i + 1}/{tweet_count})"
+            
+            # Add hashtags to last tweet if they fit
+            if i == len(tweets) - 1 and hashtags:
+                hashtag_text = " " + " ".join(hashtags)
+                if len(tweet) + len(hashtag_text) <= MAX_TWEET_LENGTH:
+                    tweet += hashtag_text
+            
+            tweets[i] = tweet
+        
+        return tweets
     
     def _generate_hashtags(self, content: str, limit: int) -> List[str]:
         """Generate relevant hashtags for the content.

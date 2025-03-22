@@ -2,7 +2,7 @@
 
 ## High Priority
 - [ ] Implement missing methods in `agent.py`:
-  - [ ] `_split_into_thread` for X/Twitter thread support
+  - [x] `_split_into_thread` for X/Twitter thread support
   - [ ] `_generate_hashtags` for platform-specific hashtag generation
   - [ ] Complete `generate_post` implementation
 - [ ] Add error handling and retries for OpenAI API calls
@@ -65,4 +65,14 @@
 - [ ] Add code formatting with black
 - [ ] Add linting with flake8
 - [ ] Add pre-commit hooks
-- [ ] Implement CI/CD pipeline 
+- [ ] Implement CI/CD pipeline
+
+## X/Twitter Thread Enhancements
+- [ ] Add support for media attachments in threads
+- [ ] Implement thread preview functionality
+- [ ] Add support for custom thread templates
+- [ ] Implement thread analytics tracking
+- [ ] Add support for thread scheduling
+- [ ] Implement thread engagement metrics
+- [ ] Add support for thread variations (A/B testing)
+- [ ] Implement thread performance optimization 
