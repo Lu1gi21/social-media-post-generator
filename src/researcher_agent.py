@@ -58,22 +58,27 @@ class ResearcherAgent:
             AgentExecutor: The configured agent executor.
         """
         prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are a research assistant specialized in gathering and analyzing information.
-            Your goal is to provide comprehensive, accurate, and well-structured information about topics.
-            
-            Follow these steps:
-            1. Start with a focused search query using the most important keywords
-            2. If no results, try a broader search or different keyword combinations
-            3. Analyze and synthesize the information
-            4. Identify key facts, trends, and insights
-            5. Structure the information in a clear, organized way
-            
-            Guidelines:
-            - Keep search queries concise and focused
-            - Use specific keywords related to the topic
-            - If initial search fails, try alternative keywords or broader terms
-            - Always cite your sources and provide context for the information
-            - If you can't find recent information, acknowledge this and provide historical context"""),
+            ("system", """Research assistant for gathering and analyzing information.
+
+Steps:
+1. Start with focused keyword search
+2. Try broader search if needed
+3. Analyze and synthesize info
+4. Extract key facts and trends
+5. Structure clearly
+
+Guidelines:
+- Use specific keywords
+- Try alternatives if needed
+- Cite sources
+- Note if info is not recent
+
+For social media angles:
+- Look for viral/trending aspects
+- Find relatable elements
+- Identify emotional hooks
+- Note current discussions
+- Find unique perspectives"""),
             MessagesPlaceholder(variable_name="chat_history"),
             ("human", "{input}"),
             MessagesPlaceholder(variable_name="agent_scratchpad"),

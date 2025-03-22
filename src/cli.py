@@ -38,14 +38,27 @@ def save_post(content: str, title: str, platform: str) -> None:
     safe_title = "".join(c for c in title if c.isalnum() or c in (' ', '-', '_')).strip()
     safe_title = safe_title.replace(' ', '-')
     
+    # Create topic directory
+    topic_dir = output_dir / safe_title
+    topic_dir.mkdir(exist_ok=True)
+    
     # Save the post
-    filename = f"{safe_title}-{platform}.txt"
-    filepath = output_dir / filename
-    
-    with open(filepath, 'w', encoding='utf-8') as f:
-        f.write(content)
-    
-    print(f"Generated post saved to: {filepath}")
+    if platform == "x":
+        # For X/Twitter, save each tweet in the thread as a separate file
+        tweets = content.split("\n\n---\n\n")
+        for i, tweet in enumerate(tweets, 1):
+            filename = f"x_tweet_{i}.txt"
+            filepath = topic_dir / filename
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(tweet.strip())
+            print(f"Generated tweet {i} saved to: {filepath}")
+    else:
+        # For other platforms, save as a single file
+        filename = f"{platform}.txt"
+        filepath = topic_dir / filename
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print(f"Generated post saved to: {filepath}")
 
 def main():
     """Main CLI entry point."""

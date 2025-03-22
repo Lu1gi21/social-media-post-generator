@@ -5,84 +5,118 @@ from typing import Dict
 class Prompts:
     """Collection of prompts for different social media platforms."""
     
+    GENZ_EMOJI_GUIDE = """
+    Emotions & Reactions:
+    🫡 - Saluting, respect
+    🫣 - Peeking, sneaky
+    🫢 - Shocked, surprised
+    🫥 - Invisible, done
+    🫤 - Annoyed, whatever
+    🫶 - Love, thanks
+    
+    Status & Mood:
+    💅 - Confidence, sass
+    💀 - Dying laughing
+    💯 - 100% agree
+    🔥 - Amazing, on fire
+    🎯 - On point
+    🫂 - Support
+    🫰 - Money
+    
+    Reactions:
+    😭 - Intense emotion
+    😮‍💨 - Exhausted
+    🥲 - Happy but sad
+    🥹 - Emotional
+    
+    Common combos:
+    💀😭 - Dying laughing
+    💅✨ - Best life
+    🫡💯 - Respect
+    🫣😮‍💨 - Can't believe it
+    """
+    
     SYSTEM_PROMPTS = {
-        "instagram": """You are an Instagram content creator. Create engaging posts that:
-- Use emojis appropriately and strategically
-- Include relevant hashtags (max 30)
-- Are visually descriptive
-- Follow Instagram's best practices
-- Don't include clickable links in the caption
-- Use line breaks for readability
-- Structure the post with:
-  * An attention-grabbing opening line
-  * Clear paragraphs with proper spacing
-  * Bullet points or numbered lists when appropriate
-  * A strong call-to-action or closing statement
-  * Hashtags on a new line""",
+        "instagram": """Format:
+- Max 30 hashtags
+- Line breaks for readability
+- Structure:
+  * Engaging opening
+  * Clear paragraphs
+  * Bullet points when needed
+  * Strong call-to-action
+  * Hashtags on new line
+- Style:
+  * Natural, conversational tone
+  * Relatable content
+  * Current references
+  * Strategic emojis
+  * Authentic voice""",
 
-        "linkedin": """You are a LinkedIn professional content creator. Create posts that:
-- Are professional and business-oriented
-- Include relevant hashtags (max 5)
-- Support rich formatting (bold, italic, lists)
-- Include call-to-actions when appropriate
-- Are optimized for professional networking
-- Can include links and media
-- Structure the post with:
-  * A compelling headline
-  * Well-formatted paragraphs with proper spacing
-  * Bullet points or numbered lists for key points
+        "linkedin": """Format:
+- Max 5 hashtags
+- Rich formatting
+- Structure:
+  * Attention-grabbing headline
+  * Formatted paragraphs
+  * Key point lists
   * Professional call-to-action
-  * Hashtags at the end""",
+  * End hashtags
+- Style:
+  * Professional insights
+  * Industry expertise
+  * Thoughtful analysis
+  * Current trends
+  * Strategic emojis""",
 
-        "facebook": """You are a Facebook content creator. Create posts that:
-- Are engaging and conversational
-- Include relevant hashtags (max 10)
-- Support rich formatting
-- Can include links and media
-- Are optimized for social sharing
-- Use appropriate tone for the platform
-- Structure the post with:
-  * An engaging opening
-  * Clear paragraphs with proper spacing
-  * Visual breaks between sections
-  * Interactive elements or questions
-  * Hashtags at the end""",
+        "facebook": """Format:
+- Max 10 hashtags
+- Rich formatting
+- Structure:
+  * Engaging opening
+  * Clear paragraphs
+  * Visual breaks
+  * Interactive elements
+  * End hashtags
+- Style:
+  * Social insights
+  * Personal experiences
+  * Current events
+  * Authentic voice
+  * Strategic emojis""",
 
-        "x": """You are an X (Twitter) content creator. Create posts that:
-- Are concise and impactful
-- Include relevant hashtags (max 5)
-- Are optimized for 280 characters
-- Can include links and media
-- Use appropriate tone for the platform
-- Don't use line breaks
-- Structure the post with:
-  * A strong opening
-  * Clear, concise message
-  * Strategic use of emojis
-  * Hashtags at the end"""
+        "x": """Format:
+- Max 5 hashtags
+- 280 char limit per tweet
+- Thread structure:
+  * First tweet: Hook + "🧵"
+  * Middle tweets: Key points
+  * Last tweet: Call-to-action + hashtags
+- Style:
+  * Current topics
+  * Concise insights
+  * Modern language
+  * Relatable content
+  * Strategic emojis
+  * Clear thread flow"""
     }
 
     @staticmethod
     def get_user_prompt(content: str, platform: str, tone: str = "neutral") -> str:
-        """Generate a user prompt for the given content and platform.
-        
-        Args:
-            content: The main content to be posted
-            platform: The social media platform
-            tone: The desired tone of the post
-            
-        Returns:
-            Formatted user prompt string
-        """
-        return f"""Create a {tone} tone post for {platform} with the following content:
+        """Generate a user prompt for the given content and platform."""
+        return f"""Create {tone} tone {platform} post with:
 {content}
 
-Please ensure the post:
-1. Follows the platform's best practices and formatting rules
-2. Has a clear structure with proper spacing and organization
-3. Uses appropriate formatting (bold, italic, lists) where supported
-4. Includes relevant hashtags within platform limits
-5. Maintains the specified tone throughout
-6. Has a strong opening and closing
-7. Uses emojis strategically (if supported by the platform)
-8. Is optimized for readability and engagement""" 
+Format:
+1. Platform best practices
+2. Clear structure
+3. Supported formatting
+4. Platform hashtag limits
+5. Consistent tone
+6. Strong open/close
+7. Strategic emojis
+8. Readable format
+9. Natural language
+10. Relatable content
+11. Current topics
+12. Authentic voice""" 

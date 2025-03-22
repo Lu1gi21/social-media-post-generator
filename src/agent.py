@@ -32,6 +32,42 @@ class SocialMediaAgent:
         self.researcher = ResearcherAgent()  # Single instance for all platforms
         self.graph = self._create_graph()
         
+        # Cache the emoji guide for reuse
+        self.emoji_guide = Prompts.GENZ_EMOJI_GUIDE
+        
+    def _optimize_emoji_usage(self, content: str, platform: str) -> str:
+        """Optimize emoji usage in the content based on platform and Gen Z style.
+        
+        Args:
+            content: The post content
+            platform: The social media platform
+            
+        Returns:
+            Content with optimized emoji usage
+        """
+        # Only optimize if the platform supports emojis
+        if not Config.get_platform_config(platform).emoji_support:
+            return content
+            
+        response = self.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": f"""You are a Gen Z emoji optimization expert. 
+                Use this guide to optimize emoji usage in the content:
+                {self.emoji_guide}
+                
+                Guidelines:
+                1. Use emojis naturally and authentically
+                2. Match the platform's vibe (e.g., more professional for LinkedIn)
+                3. Don't overuse emojis
+                4. Use combinations when appropriate
+                5. Keep the original message intact"""},
+                {"role": "user", "content": f"Optimize emoji usage in this content for {platform}:\n\n{content}"}
+            ]
+        )
+        
+        return response.choices[0].message.content
+        
     def _create_graph(self) -> Graph:
         """Create the LangGraph workflow for post generation.
         
@@ -135,15 +171,28 @@ Research:
 
 Please create a social media post based on this information."""
         
+        # Use platform-specific prompt with basic emoji guidance
+        system_prompt = f"""{Prompts.SYSTEM_PROMPTS[platform]}
+
+Note: When using emojis:
+- Use them naturally and authentically
+- Match the platform's vibe
+- Don't overuse them
+- Use combinations when appropriate"""
+        
         response = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": Prompts.SYSTEM_PROMPTS[platform]},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": Prompts.get_user_prompt(full_content, platform, tone)}
             ]
         )
         
-        state["generated_content"] = response.choices[0].message.content
+        # Optimize emoji usage after initial content generation
+        content = response.choices[0].message.content
+        optimized_content = self._optimize_emoji_usage(content, platform)
+        
+        state["generated_content"] = optimized_content
         return state
     
     def _format_post(self, state: AgentState) -> AgentState:
@@ -183,9 +232,15 @@ Please create a social media post based on this information."""
         content = state["formatted_content"]
         config = Config.get_platform_config(platform)
         
-        # Check length
-        if len(content) > config.max_length:
-            content = content[:config.max_length-3] + "..."
+        # Special handling for X/Twitter threads
+        if platform == "x":
+            # Split content into tweets
+            tweets = self._split_into_thread(content)
+            content = "\n\n---\n\n".join(tweets)
+        else:
+            # Check length for other platforms
+            if len(content) > config.max_length:
+                content = content[:config.max_length-3] + "..."
             
         # Validate hashtags
         hashtags = [tag for tag in content.split() if tag.startswith("#")]
@@ -195,6 +250,34 @@ Please create a social media post based on this information."""
             
         state["final_content"] = content
         return state
+    
+    def _split_into_thread(self, content: str) -> List[str]:
+        """Split content into a thread of tweets.
+        
+        Args:
+            content: The full content to split into tweets
+            
+        Returns:
+            List of tweets in the thread
+        """
+        # Generate thread structure
+        response = self.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": """You are a Twitter thread expert. Split the content into a thread following these rules:
+1. First tweet: Hook + "🧵"
+2. Middle tweets: Key points (max 280 chars each)
+3. Last tweet: Call-to-action + hashtags
+4. Each tweet should be self-contained
+5. Use "..." at the end of tweets that continue
+6. Keep hashtags for the last tweet"""},
+                {"role": "user", "content": f"Split this content into a Twitter thread:\n\n{content}"}
+            ]
+        )
+        
+        # Split the response into individual tweets
+        thread = response.choices[0].message.content.strip().split("\n\n")
+        return [tweet.strip() for tweet in thread if tweet.strip()]
     
     def _generate_hashtags(self, content: str, limit: int) -> List[str]:
         """Generate relevant hashtags for the content.
