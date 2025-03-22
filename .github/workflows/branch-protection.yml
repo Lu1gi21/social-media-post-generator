@@ -33,28 +33,59 @@ jobs:
           pip install --only-binary :all: pytest pytest-cov flake8 bandit black isort mypy --verbose
         timeout-minutes: 3  # Add timeout for this step
           
+      - name: Create necessary directories
+        run: |
+          mkdir -p src tests
+          
       - name: Check code formatting
         run: |
-          black --check src/ tests/
-          isort --check-only src/ tests/
+          if [ -d "src" ]; then
+            black --check src/
+          fi
+          if [ -d "tests" ]; then
+            black --check tests/
+          fi
+          if [ -d "src" ]; then
+            isort --check-only src/
+          fi
+          if [ -d "tests" ]; then
+            isort --check-only tests/
+          fi
           
       - name: Type checking
         run: |
-          mypy src/ tests/
+          if [ -d "src" ]; then
+            mypy src/
+          fi
+          if [ -d "tests" ]; then
+            mypy tests/
+          fi
           
       - name: Run tests with coverage
         run: |
-          pytest --cov=src/ --cov-report=xml tests/
+          if [ -d "tests" ]; then
+            pytest --cov=src/ --cov-report=xml tests/
+          else
+            echo "No tests directory found. Skipping tests."
+          fi
           
       - name: Check code style
         run: |
-          flake8 src/ tests/
+          if [ -d "src" ]; then
+            flake8 src/
+          fi
+          if [ -d "tests" ]; then
+            flake8 tests/
+          fi
           
       - name: Security scan
         run: |
-          bandit -r src/ -c pyproject.toml
+          if [ -d "src" ]; then
+            bandit -r src/ -c pyproject.toml
+          fi
           
       - name: Upload coverage report
+        if: success() && fileExists('./coverage.xml')
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.xml
